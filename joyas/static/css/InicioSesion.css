@@ -1,0 +1,33 @@
+.center {
+    border: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh; 
+}
+header {
+    background-color: #333; 
+    color: #fff; 
+    padding: 20px;
+    display: flex; 
+    position: relative;
+}
+.logo img{
+    left: 20px; 
+    position: absolute;
+    height: 55px;
+    width: auto;
+}
+
+h1{
+    margin: 0; 
+    text-align: center; 
+    width: 100%;
+    font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+form {
+    border: 2px solid #e4e7eb; 
+    padding: 20px; 
+    border-radius: 10px;
+}

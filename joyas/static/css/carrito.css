@@ -1,0 +1,50 @@
+/* Estilos personalizados para el carrito de compras */
+body {
+    padding-top: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.card {
+    margin-bottom: 20px;
+}
+
+.card-title {
+    font-size: 1.25rem;
+}
+
+.card-text {
+    color: #6c757d;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+/* Estilos para el carrito */
+#carrito-lista {
+    margin-bottom: 20px;
+}
+
+.carrito-item {
+    border-bottom: 1px solid #dee2e6;
+    padding: 10px 0;
+}
+
+.carrito-item:last-child {
+    border-bottom: none;
+}
+
+.carrito-total {
+    font-weight: bold;
+}
+
+/* Estilos para la página de confirmación de pedido */
+#confirmar-pedido {
+    margin-top: 20px;
+}
