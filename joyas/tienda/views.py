@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+#-----------LOGIN/REGISTER-------------------------
+
+
 from .models import Producto, Carrito, Pedido
 from .forms import ProductoForm
 
@@ -100,3 +103,7 @@ def eliminar_producto(request, producto_id):
     producto.delete()
     messages.success(request, 'Producto eliminado exitosamente')
     return redirect('admin_productos')
+
+
+#-----------------------------------------------------------------------------------------------------
+#---------------------------------REGISTER/LOGIN--------------------------------------------------------------------
