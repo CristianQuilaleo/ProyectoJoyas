@@ -11,11 +11,12 @@ class Producto(models.Model):
         return self.nombre
 
 class Carrito(models.Model):
-    usuario = models.OneToOneField(User, on_delete=models.CASCADE)
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
     productos = models.ManyToManyField(Producto, through='Pedido')
 
     def __str__(self):
-        return f"Carrito de {self.usuario.username}"
+        return f"Carrito de {self.usuario.username if self.usuario else 'anónimo'}"
+
 
 class Pedido(models.Model):
     carrito = models.ForeignKey(Carrito, on_delete=models.CASCADE)

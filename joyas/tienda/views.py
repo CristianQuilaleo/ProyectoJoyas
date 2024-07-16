@@ -3,50 +3,63 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Producto, Carrito, Pedido
 from .forms import ProductoForm
+from django.db.models import Sum
+
 
 def home(request):
     productos = Producto.objects.all()
     return render(request, 'home.html', {'productos': productos})
 
-@login_required
-def carrito(request):
-    carrito, created = Carrito.objects.get_or_create(usuario=request.user)
-    pedidos = Pedido.objects.filter(carrito=carrito)
-    return render(request, 'carrito.html', {'carrito': carrito, 'pedidos': pedidos})
 
-@login_required
+def carrito(request):
+    if request.user.is_authenticated:
+        carrito, created = Carrito.objects.get_or_create(usuario=request.user)
+    else:
+        carrito_id = request.session.get('carrito_id')
+        carrito, created = Carrito.objects.get_or_create(id=carrito_id)
+    
+    pedidos_en_carrito = carrito.pedido_set.all()  # Obtener todos los pedidos del carrito
+    total = pedidos_en_carrito.aggregate(Sum('total'))['total__sum'] or 0  # Calcular el total del carrito
+    
+    # Obtener todos los productos del carrito
+    productos_en_carrito = [pedido.producto for pedido in pedidos_en_carrito]
+    
+    return render(request, 'carrito.html', {'carrito': pedidos_en_carrito, 'productos': productos_en_carrito, 'total': total})
+
 def add_to_cart(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
-    carrito, created = Carrito.objects.get_or_create(usuario=request.user)
-    pedido, created = Pedido.objects.get_or_create(carrito=carrito, producto=producto)
-
-    if not created:
-        pedido.cantidad += 1
-    pedido.save()
-
-    messages.success(request, 'Producto agregado al carrito.')
+    
+    if 'cart' not in request.session:
+        request.session['cart'] = []
+    
+    cart = request.session['cart']
+    
+    if producto_id not in cart:
+        cart.append(producto_id)
+        request.session['cart'] = cart
+        messages.success(request, f'El producto "{producto.nombre}" ha sido agregado al carrito.')
+    
     return redirect('base')
 
-@login_required
-def remove_from_cart(request):
-    if request.method == "POST":
-        product_id = request.POST.get('product_id')
-        producto = get_object_or_404(Producto, id=product_id)
-        carrito = Carrito.objects.get(usuario=request.user)
-        
-        pedido = Pedido.objects.get(carrito=carrito, producto=producto)
-        if pedido.cantidad > 1:
-            pedido.cantidad -= 1
-            pedido.save()
-        else:
-            pedido.delete()
-        
-        messages.success(request, f'{producto.nombre} ha sido eliminado del carrito')
-        return redirect('carrito')
+
+def remove_from_cart(request, producto_id):
+    producto = get_object_or_404(Producto, id=producto_id)
     
-    # Si el método no es POST, retornar un error
-    messages.error(request, 'Método no permitido')
-    return redirect('home')
+    if 'cart' in request.session:
+        cart = request.session['cart']
+        
+        if producto_id in cart:
+            cart.remove(producto_id)
+            request.session['cart'] = cart
+            messages.success(request, f'El producto "{producto.nombre}" ha sido eliminado del carrito.')
+        else:
+            messages.info(request, f'El producto "{producto.nombre}" no estaba en el carrito.')
+    
+    return redirect('base')
+
+def base(request):
+    productos = Producto.objects.all()
+    return render(request, 'base.html', {'productos': productos})
 
 def inicio_sesion(request):
     return render(request, 'InicioSesion.html')
@@ -54,12 +67,16 @@ def inicio_sesion(request):
 def registro(request):
     return render(request, 'Registro.html')
 
-def base(request):
-    productos = Producto.objects.all()
-    return render(request, 'base.html', {'productos': productos})
-
+@login_required
 def confirmar_pedido(request):
-    return render(request, 'confirmarPedido.html')
+    if request.method == 'POST':
+        # Aquí puedes manejar la lógica de confirmación de la compra
+        pedidos = Pedido.objects.filter(usuario=request.user)
+        # Procesar la compra...
+        return render(request, 'confirmarPedido.html', {'pedidos': pedidos})
+    else:
+        return redirect('carrito')
+    
 
 
 def admin_productos(request):
@@ -67,6 +84,7 @@ def admin_productos(request):
         form = ProductoForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Producto agregado exitosamente')
             return redirect('admin_productos')
     else:
         form = ProductoForm()
@@ -100,3 +118,12 @@ def eliminar_producto(request, producto_id):
     producto.delete()
     messages.success(request, 'Producto eliminado exitosamente')
     return redirect('admin_productos')
+
+def cart_detail(request):
+    if request.user.is_authenticated:
+        carrito = Carrito.objects.filter(usuario=request.user).first()
+    else:
+        carrito_id = request.session.get('carrito_id')
+        carrito = Carrito.objects.filter(id=carrito_id).first() if carrito_id else None
+
+    return render(request, 'carrito.html', {'carrito': carrito})

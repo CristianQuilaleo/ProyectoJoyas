@@ -8,16 +8,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carrito de Compras - Tienda de Joyas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="{% static 'tienda/css/archivo.css' %}"> <!-- Ajusta la ruta según la ubicación de tu archivo CSS -->
+    <link rel="stylesheet" href="{% static 'tienda/css/archivo.css' %}">
 </head>
 <body>
-  <!-- Barra de navegacion login/registro -->
+  <!-- Barra de navegación login/registro -->
   <div class="row" style="background-color: black;">
     <div class="col"></div>
     <div class="col-2 align-self-center" style="background-color: rgb(73, 73, 73);">
       <div class="d-flex justify-content-around">
-        <a class="navbar-brand" style="color: aliceblue;" href="{% url 'inicio_sesion' %}">Login</a>
-        <a class="navbar-brand" style="color: aliceblue;" href="{% url 'registro' %}">Register</a>
+        <a class="navbar-brand" style="color: aliceblue;" href="{% url 'inicio_sesion' %}">Iniciar sesión</a>
+        <a class="navbar-brand" style="color: aliceblue;" href="{% url 'registro' %}">Registrarse</a>
       </div>
     </div>
   </div>
@@ -29,13 +29,13 @@
         <div class="container-fluid">
           <div class="col"></div>
           <div class="col" style="background-color: black;">
-            <a class="navbar-brand" style="color: aliceblue;" href="{% url 'home' %}">Home</a>
+            <a class="navbar-brand" style="color: aliceblue;" href="{% url 'home' %}">Inicio</a>
           </div>
           <div class="col" style="background-color: black;">
-            <a class="navbar-brand" style="color: aliceblue;" href="{% url 'base' %}">Articulos</a>
+            <a class="navbar-brand" style="color: aliceblue;" href="{% url 'base' %}">Artículos</a>
           </div>
           <div class="col" style="background-color: black;">
-            <a class="navbar-brand" style="color: aliceblue;" href="#">Quienes somos</a>
+            <a class="navbar-brand" style="color: aliceblue;" href="#">Quiénes somos</a>
           </div>
           <div class="col" style="background-color: black;">
             <a class="navbar-brand" style="color: aliceblue;" href="{% url 'carrito' %}">Carrito</a>
@@ -45,6 +45,7 @@
       </nav>
     </div>
   </div>
+
   <div class="container mt-4">
     <h2>Carrito de Compras</h2>
     <div class="row">
@@ -60,30 +61,48 @@
             </tr>
           </thead>
           <tbody>
-            {% for item in carrito %}
-            <tr>
-              <td>{{ item.producto.nombre }}</td>
-              <td>${{ item.producto.precio }}</td>
-              <td>{{ item.cantidad }}</td>
-              <td>${{ item.subtotal }}</td>
-              <td>
-                <form method="post" action="{% url 'remove_from_cart' %}">
-                  {% csrf_token %}
-                  <input type="hidden" name="product_id" value="{{ item.producto.id }}">
-                  <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
-                </form>
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="5">El carrito está vacío.</td>
-            </tr>
-            {% endfor %}
+            {% if carrito %}
+              {% for pedido in carrito %}
+                <tr>
+                  <td>{{ pedido.producto.nombre }}</td>
+                  <td>${{ pedido.producto.precio }}</td>
+                  <td>{{ pedido.cantidad }}</td>
+                  <td>${{ pedido.total }}</td>
+                  <td>
+                    <form method="post" action="{% url 'remove_from_cart' pedido.producto.id %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-danger btn-sm">Eliminar</button>
+                    </form>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5">El carrito está vacío.</td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="5">El carrito está vacío.</td>
+              </tr>
+            {% endif %}
           </tbody>
         </table>
+        <h4>Productos en el carrito:</h4>
+        <ul>
+          {% for producto in productos %}
+            <li>{{ producto.nombre }} - Precio: ${{ producto.precio }}</li>
+          {% empty %}
+            <li>No hay productos adicionales en el carrito.</li>
+          {% endfor %}
+        </ul>
+        
         <div class="text-end">
           {% if carrito %}
-          <a href="{% url 'confirmar_pedido' %}" class="btn btn-primary">Confirmar Pedido</a>
+            {% if request.user.is_authenticated %}
+              <a href="{% url 'confirmar_pedido' %}" class="btn btn-primary">Confirmar Pedido</a>
+            {% else %}
+              <a href="{% url 'inicio_sesion' %}?next={% url 'confirmar_pedido' %}" class="btn btn-primary">Inicia sesión para confirmar el pedido</a>
+            {% endif %}
           {% endif %}
         </div>
       </div>
