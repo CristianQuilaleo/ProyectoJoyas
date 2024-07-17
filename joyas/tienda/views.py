@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Producto, Carrito, Pedido
 from .forms import ProductoForm, CustomUserCreationForm
 from django.db.models import Sum
@@ -124,9 +124,13 @@ def confirmar_pedido(request):
         return render(request, 'confirmarPedido.html', {'pedidos': pedidos})
     else:
         return redirect('carrito')
-    
 
 
+def admin_required(user):
+    return user.is_superuser
+
+
+@user_passes_test(admin_required)
 def admin_productos(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST, request.FILES)
