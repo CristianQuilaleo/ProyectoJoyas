@@ -62,7 +62,7 @@
     <br>
     <br>
 
-    <div class="container">
+    <div class="container mt-5">
         <!-- Mostrar mensajes de éxito o error -->
         {% if messages %}
             <div class="row">
@@ -76,7 +76,7 @@
             </div>
         {% endif %}
 
-        <div class="center">
+        <div class=" row justify-content center">
             {% block content %}
             <form action="" method="post">
                 {% csrf_token %}
@@ -89,7 +89,7 @@
                         <br>
                         <input type="password" name="password" id="" placeholder="Contraseña">
 
-                        <button class="btn btn-sm btn-primary float-end" type="submit">Entrar</button>
+                        <button class="btn btn-primary btn-block mt-3" type="submit">Entrar</button>
                     </div>
                 </div>
             </form>
