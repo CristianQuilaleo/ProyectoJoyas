@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Producto, Carrito, Pedido
-from .forms import ProductoForm
+from .forms import ProductoForm, CustomUserCreationForm
+from django.contrib.auth import authenticate, login, logout
 
 def home(request):
     productos = Producto.objects.all()
@@ -49,10 +50,32 @@ def remove_from_cart(request):
     return redirect('home')
 
 def inicio_sesion(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            messages.success(request, 'Usuario logueado con éxito')
+            return redirect('home')  # Redirige a una vista específica después de iniciar sesión
+        else:
+            messages.error(request, 'Nombre de usuario o contraseña incorrectos')
     return render(request, 'InicioSesion.html')
 
 def registro(request):
-    return render(request, 'Registro.html')
+    data={
+        'form': CustomUserCreationForm()
+    }
+
+    if request.method == 'POST':
+        user_creation_form = CustomUserCreationForm(data=request.POST)
+
+        if user_creation_form.is_valid():
+            user_creation_form.save()
+
+            user = authenticate(username=user_creation_form.cleaned_data['username'], password=user_creation_form.cleaned_data['password1'])
+
+    return render(request, 'Registro.html', data)
 
 def base(request):
     productos = Producto.objects.all()
@@ -100,3 +123,7 @@ def eliminar_producto(request, producto_id):
     producto.delete()
     messages.success(request, 'Producto eliminado exitosamente')
     return redirect('admin_productos')
+
+def exit(request):
+    logout(request)
+    return redirect('home')
