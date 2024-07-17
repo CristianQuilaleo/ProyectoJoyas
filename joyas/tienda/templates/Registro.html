@@ -1,21 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-
-
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="Registro.css">
+    <link rel="stylesheet" href="{% static 'css/archivo.css' %}">
     <title>Registro</title>
     <script src="registro.js"></script>
 </head>
 
 <body>
     <!--Barra de navegacion login/registro-->
-
     <div class="row" style="background-color: black;">
         <div class="col"></div>
         <div class="col-2 align-self-center" style="background-color: rgb(73, 73, 73);">
@@ -25,47 +22,50 @@
         </div>
     </div>
 
-    <!--Barra de navegación pag web-->
-    <div class="row " style="background-color: black;">
-        <div class="col-10">
-            <nav class="navbar navbar-expand-lg " style="background-color: black;">
-                <div class="container-fluid ">
-                    <div class="col"></div>
-                    <div class="col"></div>
-                </div>
-            </nav>
+  <!-- Barra de navegación pag web -->
+  <div class="row" style="background-color: black; justify-content: center;">
+    <div class="col-10">
+      <nav class="navbar navbar-expand-lg" style="background-color: black;">
+        <div class="container-fluid">
+          <div class="col"></div>
+          <div class="col" style="background-color: black;">
+            <a class="navbar-brand" style="color: aliceblue;" href="{% url 'home' %}">Home</a>
+          </div>
+          <div class="col" style="background-color: black;">
+            <a class="navbar-brand" style="color: aliceblue;" href="{% url 'base' %}">Articulos</a>
+          </div>
+          <div class="col" style="background-color: black;">
+            <a class="navbar-brand" style="color: aliceblue;" href="#">Quienes somos</a>
+          </div>
+          <div class="col" style="background-color: black;">
+            <a class="navbar-brand" style="color: aliceblue;" href="{% url 'carrito' %}">Carrito</a>
+          </div>
+          <div class="col"></div>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+    <!-- Logo -->
+    <div class="row" style="background-color: black; justify-content: center;">
+        <div class="col-auto">
+            <img id="imgLogo" src="{% static 'img/logo_adepac.png' %}" alt="Logo de Adepac">
         </div>
     </div>
-
-    <!--Logo-->
-    <div class="row">
-        <div class="col-4" style="background-color: black;"></div>
-        <div class="col-4" style="background-color: black;">
-            <img src="img/logo_adepac.png" alt="" class="img-fluid">
-        </div>
-        <div class="col-4" style="background-color: black;"></div>
-    </div>
-
 
     <br>
     <br>
 
     <!--formulario-->
-
-
-
-
-    <div class="row " style="background-color: rgb(255, 255, 255);">
-        <div class="col-2"></div>
-
-        <div class="col">
+    
+    <div class="row" style="background-color: rgb(255, 255, 255);">   
+        
+        <div class="col mt-5">
             {% block content %}
             {% load crispy_forms_tags %}
-
-            
             <form action="" method="post">
                 {% csrf_token %}
-                <div class="card" style="width: 18rem;">
+                <div class="card mx-auto" style="width: 18rem;">
                     <div class="card-body">
                         <h5 class="card-title">Ingresa tus datos</h5>
                         {% crispy form %}
@@ -73,26 +73,20 @@
                     </div>
                 </div>
             </form>
-            
-            
-
             <!-- Mensaje de registro exitoso -->
             <div id="mensajeRegistro" style="color: green;"></div>
-            {% endblock %} 
-        </div>
-
-        <div class="col-2"></div>
+            {% endblock %}
+        </div>     
     </div>
+    
     <br>
     <br>
     <div class="row">
-        <div class="col " style="background-color: black;">
+        <div class="col" style="background-color: black;">
             <footer>
                 <p style="color: aliceblue;">Derechos de autor © 2024 - Adepac</p> <!-- Pie de página -->
-                    
             </footer>
         </div>
     </div>
 </body>
-
 </html>
