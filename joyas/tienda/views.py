@@ -2,8 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import Producto, Carrito, Pedido
-from .forms import ProductoForm
+from .forms import ProductoForm, CustomUserCreationForm
 from django.db.models import Sum
+from django.contrib.auth import authenticate, login, logout
 
 
 def home(request):
@@ -49,7 +50,6 @@ def add_to_cart(request, producto_id):
     messages.success(request, f'El producto "{producto.nombre}" ha sido agregado al carrito.')
     return redirect('base')
 
-
 def remove_from_cart(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
     
@@ -81,10 +81,39 @@ def base(request):
     return render(request, 'base.html', {'productos': productos})
 
 def inicio_sesion(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            messages.success(request, 'Usuario logueado con éxito')
+            return redirect('home')  # Redirige a una vista específica después de iniciar sesión
+        else:
+            messages.error(request, 'Nombre de usuario o contraseña incorrectos')
     return render(request, 'InicioSesion.html')
 
 def registro(request):
-    return render(request, 'Registro.html')
+    data = {
+        'form': CustomUserCreationForm()
+    }
+
+    if request.method == 'POST':
+        user_creation_form = CustomUserCreationForm(data=request.POST)
+
+        if user_creation_form.is_valid():
+            user_creation_form.save()
+
+            user = authenticate(username=user_creation_form.cleaned_data['username'], password=user_creation_form.cleaned_data['password1'])
+            login(request, user)
+            messages.success(request, 'Usuario registrado y logueado exitosamente')
+            return redirect('home')
+
+    return render(request, 'Registro.html', data)
+
+def exit(request):
+    logout(request)
+    return redirect('home')
 
 @login_required
 def confirmar_pedido(request):

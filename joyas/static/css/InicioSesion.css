@@ -27,6 +27,8 @@ h1{
 }
 
 form {
+    justify-content: center;
+    align-items: center;
     border: 2px solid #e4e7eb; 
     padding: 20px; 
     border-radius: 10px;
