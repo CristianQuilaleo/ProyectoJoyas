@@ -16,41 +16,60 @@ def carrito(request):
         carrito, created = Carrito.objects.get_or_create(usuario=request.user)
     else:
         carrito_id = request.session.get('carrito_id')
-        carrito, created = Carrito.objects.get_or_create(id=carrito_id)
-    
+        if carrito_id:
+            carrito = Carrito.objects.get(id=carrito_id)
+        else:
+            carrito = Carrito.objects.create()
+            request.session['carrito_id'] = carrito.id
+
     pedidos_en_carrito = carrito.pedido_set.all()  # Obtener todos los pedidos del carrito
     total = pedidos_en_carrito.aggregate(Sum('total'))['total__sum'] or 0  # Calcular el total del carrito
     
-    # Obtener todos los productos del carrito
-    productos_en_carrito = [pedido.producto for pedido in pedidos_en_carrito]
-    
-    return render(request, 'carrito.html', {'carrito': pedidos_en_carrito, 'productos': productos_en_carrito, 'total': total})
+    return render(request, 'carrito.html', {'carrito': pedidos_en_carrito, 'total': total})
+
 
 def add_to_cart(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
     
-    if 'cart' not in request.session:
-        request.session['cart'] = []
+    if request.user.is_authenticated:
+        carrito, created = Carrito.objects.get_or_create(usuario=request.user)
+    else:
+        carrito_id = request.session.get('carrito_id')
+        if carrito_id:
+            carrito = Carrito.objects.get(id=carrito_id)
+        else:
+            carrito = Carrito.objects.create()
+            request.session['carrito_id'] = carrito.id
+
+    pedido, created = Pedido.objects.get_or_create(carrito=carrito, producto=producto)
+    if not created:
+        pedido.cantidad += 1
+        pedido.save()
     
-    cart = request.session['cart']
-    
-    if producto_id not in cart:
-        cart.append(producto_id)
-        request.session['cart'] = cart
-        messages.success(request, f'El producto "{producto.nombre}" ha sido agregado al carrito.')
-    
+    messages.success(request, f'El producto "{producto.nombre}" ha sido agregado al carrito.')
     return redirect('base')
 
 
 def remove_from_cart(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
     
-    if 'cart' in request.session:
-        cart = request.session['cart']
-        
-        if producto_id in cart:
-            cart.remove(producto_id)
-            request.session['cart'] = cart
+    if request.user.is_authenticated:
+        carrito = Carrito.objects.get(usuario=request.user)
+    else:
+        carrito_id = request.session.get('carrito_id')
+        if carrito_id:
+            carrito = Carrito.objects.get(id=carrito_id)
+        else:
+            carrito = None
+    
+    if carrito:
+        pedido = Pedido.objects.filter(carrito=carrito, producto=producto).first()
+        if pedido:
+            if pedido.cantidad > 1:
+                pedido.cantidad -= 1
+                pedido.save()
+            else:
+                pedido.delete()
             messages.success(request, f'El producto "{producto.nombre}" ha sido eliminado del carrito.')
         else:
             messages.info(request, f'El producto "{producto.nombre}" no estaba en el carrito.')
